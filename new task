@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_INPUT_SIZE 1024
+#define MAX_ARGS 64
+#define DELIM " \t\r\n\a"
+
+// Function to parse the input into arguments
+void parse_input(char *input, char **args) {
+    char *token;
+    int index = 0;
+
+    token = strtok(input, DELIM);
+    while (token != NULL) {
+        args[index++] = token;
+        token = strtok(NULL, DELIM);
+    }
+    args[index] = NULL; // Null-terminate the argument list
+}
+
+// Function to execute a command
+void execute_command(char **args) {
+    char command[MAX_INPUT_SIZE] = "";
+    for (int i = 0; args[i] != NULL; i++) {
+        strcat(command, args[i]);
+        strcat(command, " ");
+    }
+
+    if (system(command) == -1) {
+        perror("Error: Command execution failed");
+    }
+}
+
+// Main function
+int main() {
+    char input[MAX_INPUT_SIZE];
+    char *args[MAX_ARGS];
+
+    while (1) {
+        printf("shell> ");
+        if (fgets(input, MAX_INPUT_SIZE, stdin) == NULL) {
+            break; // Exit on EOF (Ctrl+D)
+        }
+
+        // Remove the trailing newline character
+        input[strcspn(input, "\n")] = '\0';
+
+        if (strlen(input) == 0) {
+            continue; // Skip empty input
+        }
+
+        // Check for the quit command
+        if (strcmp(input, "quit") == 0) {
+            break; // Exit the shell
+        }
+
+        // Parse and execute the command
+        parse_input(input, args);
+        execute_command(args);
+    }
+
+    return 0;
+}h
